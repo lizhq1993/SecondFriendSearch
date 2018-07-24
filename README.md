@@ -1,5 +1,5 @@
 # 基于mapreduce的二度人脉搜索算法
 
-无向图（互相关注）
+1. 基于互相关注好友的二度人脉算法（类似无向图） MutualDeg2Friend.java
 
-有向图（单向关注）
+2. 基于单向关注好友的二度人脉算法（类似有向图） OnesideDeg2Friend.java
