@@ -88,39 +88,32 @@ public class De2Friends {
     }
 
     public static void main(String[] args) throws Exception{
-        System.setProperty("hadoop.home.dir","E:\\softs\\majorSoft\\hadoop-2.7.5");
         Configuration conf =new Configuration();
-        conf.set("mapreduce.app-submission.cross-platform", "true");
-        Path fileInput = new Path("hdfs://mycluster/testFile/qq.txt");
-        Path tempDir = new Path("hdfs://mycluster/output/deg2friend-temp-" + Integer.toString(new Random().nextInt(Integer.MAX_VALUE)));
-        Path fileOutput = new Path("hdfs://mycluster/output/qq");
-        Job job = Job.getInstance(conf,"de2Firend");
-        job.setJar("E:\\bigData\\hadoopDemo\\out\\artifacts\\wordCount_jar\\hadoopDemo.jar");
-        job.setJarByClass(De2Friends.class);
-        job.setMapperClass(De2Mapper1.class);
-        job.setReducerClass(De2Reducer1.class);
-        job.setMapOutputKeyClass(Text.class);
-        job.setMapOutputValueClass(Text.class);
-        job.setNumReduceTasks(1);
-        job.setOutputKeyClass(Text.class);
-        job.setOutputValueClass(Text.class);
+        if (otherArgs.length != 2) {
+          System.err.println("Usage: Deg2friend <in> <out>");
+          System.exit(2);
+        }
+        Path tempDir = new Path("/data/deg2friend/temp-" + Integer.toString(new Random().nextInt(Integer.MAX_VALUE)));
+        Job job1 = Job.getInstance(conf,"de2Firend1");
+        job1.setJarByClass(De2Friends.class);
+        job1.setMapperClass(De2Mapper1.class);
+        job1.setReducerClass(De2Reducer1.class);
+        job1.setOutputKeyClass(Text.class);
+        job1.setOutputValueClass(Text.class);
 
-        FileInputFormat.addInputPath(job,fileInput);
-        FileOutputFormat.setOutputPath(job,tempDir);
-        job.waitForCompletion(true);//必须有，感觉是等job执行完才让job2执行的效果，即阻塞吧
+        FileInputFormat.addInputPath(job1,new Path(args[0]));
+        FileOutputFormat.setOutputPath(job1,tempDir);
+        job1.waitForCompletion(true);//必须有，感觉是等job执行完才让job2执行的效果，即阻塞吧
 
-        Job job2 = Job.getInstance(conf,"de2Firend");
-        job2.setJar("E:\\bigData\\hadoopDemo\\out\\artifacts\\wordCount_jar\\hadoopDemo.jar");
+        Job job2 = Job.getInstance(conf,"de2Firend2");
         job2.setJarByClass(De2Friends.class);
         job2.setMapperClass(De2Mapper2.class);
         job2.setReducerClass(De2Reducer2.class);
-        job2.setMapOutputKeyClass(Text.class);
-        job2.setMapOutputValueClass(Text.class);
         job2.setOutputKeyClass(Text.class);
         job2.setOutputValueClass(Text.class);
 
         FileInputFormat.addInputPath(job2,tempDir);
-        FileOutputFormat.setOutputPath(job2,fileOutput);
+        FileOutputFormat.setOutputPath(job2,new Path(args[1]));
 
         System.exit(job2.waitForCompletion(true)?0:1);
     }

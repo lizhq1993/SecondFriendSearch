@@ -140,13 +140,12 @@ public class deg2friend {
 	public static void main(String[] args) throws Exception {
 		  
 	    Configuration conf = new Configuration();
-	    String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
 	    if (otherArgs.length != 2) {
 	      System.err.println("Usage: deg2friend <in> <out>");
 	      System.exit(2);
 	    }
 	    
-	    Job job1 = new Job(conf, "deg2friend");
+	    Job job1 = new Job(conf, "deg2friend1");
 	    job1.setJarByClass(deg2friend.class);
 	    job1.setMapperClass(job1Mapper.class);
 	    job1.setReducerClass(job1Reducer.class);
@@ -155,20 +154,20 @@ public class deg2friend {
 	    job1.setOutputValueClass(Text.class);
 	    
 	    //定义一个临时目录，先将任务的输出结果写到临时目录中, 下一个排序任务以临时目录为输入目录。
-	    FileInputFormat.addInputPath(job1, new Path(otherArgs[0]));
-		Path tempDir = new Path("deg2friend-temp-" + Integer.toString(new Random().nextInt(Integer.MAX_VALUE))); 
+	    FileInputFormat.addInputPath(job1, new Path(args[0]));
+		Path tempDir = new Path("/data/deg2friend/temp-" + Integer.toString(new Random().nextInt(Integer.MAX_VALUE))); 
 		FileOutputFormat.setOutputPath(job1, tempDir);
 		
 		if(job1.waitForCompletion(true))
 		{
-			Job job2 = new Job(conf, "deg2friend");
+			Job job2 = new Job(conf, "deg2friend2");
 			job2.setJarByClass(deg2friend.class);
 			
 			FileInputFormat.addInputPath(job2, tempDir);
 			
 			job2.setMapperClass(job2Mapper.class);
 		    job2.setReducerClass(job2Reducer.class);
-			FileOutputFormat.setOutputPath(job2, new Path(otherArgs[1]));
+			FileOutputFormat.setOutputPath(job2, new Path(args[1]));
 			
 			job2.setOutputKeyClass(Text.class);
 			job2.setOutputValueClass(Text.class);
